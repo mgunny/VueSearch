@@ -1,0 +1,112 @@
+﻿
+@{
+
+    string culture = ViewData["Culture"].ToString();
+    Dictionary<string, string> res = ViewBag.Resources;
+}
+
+
+
+<div class="container mb-5">
+
+    <section id="productsearch" v-cloak>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" asp-controller="Home"><span class="fa fa-home mr-1"></span> @res["Text_Home"]</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" asp-controller="Product">@res["Nav_Products"]</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@res["Nav_ProductSearch"]</li>
+            </ol>
+            <hr />
+        </nav>
+
+        <div class="row">
+
+            <div class="col-md-4 order-last order-md-first main-category-box">
+                <partial name="_MainCategoryList" />
+            </div>
+
+                <div class="col-md-8 order-first order-md-last mt-1 mt-sm-4 m-md-0">
+
+                    <h1 class="ANLTProsmallblue">@res["Nav_ProductSearch"].ToUpper()</h1>
+
+                    <article class="row">
+                        <div class="col-12">
+                            <div class="input-group input-group-lg my-3">
+
+                                <input autofocus="autofocus" type="text" v-model="searchText" @@input="textChanged(searchText)"
+                                       class="form-control input-spinner" placeholder="@res["Text_TypeSearchCriteria"]">
+                                <div v-if="loadingProducts" class="input-spinner-position"><span class="fa fa-2x fa-spin fa-spinner"></span></div>
+
+                            </div>
+
+                            <div v-if="loadingProducts" class="ANLTProextrasmallblue mt-4 mb-2">
+                                <span><i class="fa fa-spinner fa-spin"></i>&nbsp;&nbsp;@res["Text_Loading_Product"]</span>
+                            </div>
+
+                            <div v-if="!loadingProducts" class="ANLTProextrasmallblue mt-4">
+                                <p>@res["Text_ProductsFound"] {{products.length}}</p>
+                            </div>
+
+                        </div>
+                    </article>
+
+                    <article class="row mb-4 mx-1 mx-sm-0 product-grid-spacing">
+
+                        <div v-for="prod in products" :key="prod.sys.id" class="sub-category-box col-12 col-sm-12 col-md-6 col-lg-4 col-xl-3 text-center">
+
+                            <div style="min-height: 60px;">
+
+                                <a v-bind:href="'/' + culture + '/Product/ProductDetail/' + prod.sys.id">
+                                    <img v-if="!prod.productThumbnail" src="~/images/NoImage.png" height="100" alt="No Image Found" />
+                                </a>
+
+                                <clazy-load v-if="prod.productThumbnail" v-bind:src="'https:' + prod.productThumbnail.file.url">
+                                    <a v-bind:href="'/' + culture + '/Product/ProductDetail/' + prod.sys.id"><img style="height: 100px;" v-bind:src="'https:' + prod.productThumbnail.file.url"></a>
+                                    <div class="preloader" slot="placeholder"><img style="height: 100px;" src="~/images/spinner.gif" /></div>
+                                </clazy-load>
+
+                                <div class="text-center mt-1">
+                                    <a class="ANLTProextrasmallblue" v-bind:href="'/' + culture + '/Product/ProductDetail/' + prod.sys.id">
+                                        {{prod.primaryDescription}}
+                                    </a>
+                                    <p class="ANLTProextrasmallgray mt-2">{{prod.secondaryDescription}}</p>
+
+                                    <div class="ANLTProextrasmallblue my-2">
+                                        <vue-intl-numberformat locale="@culture" format-Style="currency" currency="CAD" :number="prod.price"></vue-intl-numberformat>
+                                    </div>
+
+                                    <shopping-cart-button :addtocart="resourceStrings.Text_Cart_AddToCart" :productsku="prod.productSku"></shopping-cart-button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+
+</section>
+
+</div>
+
+
+@section Scripts {
+
+    <script src="~/js/SiteScripts/ProductSearch.es5.js" asp-append-version="true"></script>
+
+    <script>
+
+        var culture = '@culture';
+        var resourceStrings = '@Html.Raw(Json.Serialize(res))';
+
+        ActivateProductSearch(culture, resourceStrings);
+
+    </script>
+}
