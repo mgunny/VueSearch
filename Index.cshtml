@@ -1,0 +1,92 @@
+﻿
+@{
+    string culture = ViewBag.Culture;
+    string findStoreUrl = ViewBag.FindStoreUrl;
+    string catalogueUrl = ViewBag.CatalogueUrl;
+    Dictionary<string, string> res = (Dictionary<string, string>)ViewBag.Resources;
+}
+
+    <header id="mainmenu" v-cloak>
+
+        <vue-snotify></vue-snotify>
+
+
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <img src="~/images/logo_footer.png" class="img-fluid" alt="Silverline Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse px-3" id="navbarCollapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@res["Text_Home"].ToUpper()</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="Index">@res["Nav_Products"].ToUpper()</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@findStoreUrl" target="_blank">@res["Nav_FindStore"].ToUpper()</a></li>
+                    <li class="nav-item"><a class="nav-link" href="@catalogueUrl" target="_blank">@res["Nav_Catalogue"].ToUpper()</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Support" asp-action="Index">@res["Nav_Support"].ToUpper()</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Product" asp-action="ProductSearch"><span class="fa fa-search"></span></a></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ShoppingCart" asp-action="Index">
+                            <span class="fa fa-lg fa-shopping-cart"></span> <span v-if="cartCount > 0">[{{cartCount}}]</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <span class="fa fa-globe"></span> <span>@culture.Substring(0, 2).ToUpper()</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/en-CA">
+                                <span class="fa fa-globe mr-1"></span> ENGLISH
+                            </a>
+                            <a class="dropdown-item" href="/fr-CA">
+                                <span class="fa fa-globe mr-1"></span> FRANCAIS
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+    </header>
+
+<script>
+
+    (function () {
+
+        var cart = new Vue({
+            el: '#mainmenu',
+            created: function () {
+                var parent = this;
+                this.products  = localStorage.cart ? localStorage.cart.split(",") : []
+
+                EventBus.$on('update-mini-cart', function (sku) {
+                    
+                    if (sku === "delete") { parent.cartCount = parent.cartCount - 1; return; }
+                    if (sku === "clear") { parent.cartCount = 0; return; }
+
+                    if (parent.products && parent.products.indexOf(sku) !== -1) {
+                        Snotify.warning('@res["Text_Cart_AlreadyAdded"]', '@res["Text_Cart_Failed"]' + sku);
+                    }
+                    else {
+                        parent.products.push(sku);
+                        localStorage.cart = parent.products.toString();
+                        this.$snotify.success('@res["Text_Cart_Added"]', '@res["Text_Cart_Updated"]' + sku);                        
+                    }      
+                    parent.cartCount = parent.products.length;
+                });
+            },           
+            data: function () {
+                return {
+                    products: [],
+                    cartCount: localStorage.cart ? localStorage.cart.split(",").length : 0
+                };
+            }
+        });
+        
+    })();
+
+</script>
