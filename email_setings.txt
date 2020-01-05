@@ -1,0 +1,10 @@
+"Email": {
+    "FromName": "some name here",
+    "FromAddress": "name info@somewhere.co.uk",
+    "ToAddress": "info@somewhere.co.uk",
+    "LocalDomain": "",
+    "MailServerAddress": "mail.somewhere.co.uk",
+    "MailServerPort": "25",
+    "UserId": "postmaster@somewhere.co.uk",
+    "Password": "your-password"
+  }
